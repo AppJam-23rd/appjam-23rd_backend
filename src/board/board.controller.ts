@@ -15,7 +15,7 @@ export class BoardController {
   @Get()
   @UseGuards(AccessGuard)
   async fetchAllBoards(@Req() req): Promise<BoardEntity[]> {
-    return await this.boardService.fetchAllBoards();
+    return await this.boardService.fetchAllBoardsWithProfile();
   }
 
   @Post()

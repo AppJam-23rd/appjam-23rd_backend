@@ -19,6 +19,12 @@ export class FoodService {
     });
   }
 
+  async fetchFoodById(id: string) {
+    return await this.foodRepository.findOne({
+      where: { id },
+    });
+  }
+
   async createFood(food: FoodEntity) {
     const foodCreate = this.foodRepository.create({
       ...food,

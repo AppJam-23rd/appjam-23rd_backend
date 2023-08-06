@@ -5,6 +5,9 @@ import { Repository } from "typeorm";
 import { JwtService } from "@nestjs/jwt";
 import { ConfigService } from "@nestjs/config";
 import { FreezerItem } from "./freezer.intrerface";
+import { FoodEntity } from "../food/food.entity";
+import { async } from "rxjs";
+import { FoodService } from "../food/food.service";
 
 @Injectable()
 export class FreezerService {
@@ -15,6 +18,7 @@ export class FreezerService {
       private readonly freezerItemRepository: Repository<FreezerItemEntity>,
       private jwtService: JwtService,
       private readonly config: ConfigService,
+      private readonly foodService: FoodService
     ) {}
 
   getUUIDFromReq(req: any): string {
@@ -29,6 +33,22 @@ export class FreezerService {
       );
     }
 
+    async fetchAllFreezersWithItemCount(user_uuid:string) {
+      const temp = await this.freezerRepository.find(
+        { where: { user_uuid } }
+      );
+      const freezers = await Promise.all(temp.map(async (freezer) => {
+        const count = await this.freezerItemRepository.count({
+          where: { freezer_id: freezer.freezer_id },
+        });
+        return {
+          ...freezer,
+          count,
+        };
+      }));
+      return freezers;
+    }
+
     async createFreezer(user_uuid:string, freezer:FreezerEntity): Promise<FreezerEntity> {
       return this.freezerRepository.save({
         user_uuid,
@@ -36,11 +56,10 @@ export class FreezerService {
       });
     }
 
-    async addFoodToFreezer(freezer_id:string, food:FreezerItem) {
+    async addFoodToFreezer(food:FreezerItem) {
       // make item and add it to freezer
       const freezerItem = this.freezerItemRepository.create({
-        ...food,
-        freezer_id,
+        ...food
       });
       return this.freezerItemRepository.save(freezerItem);
     }
@@ -52,9 +71,14 @@ export class FreezerService {
     }
 
     async fetchFreezerItem(freezer_item_uuid:string) {
-      return this.freezerItemRepository.findOne({
+      const item = await this.freezerItemRepository.findOne({
         where: { freezer_item_uuid },
       });
+      const food = await this.foodService.fetchFoodById(item.food_id);
+      return {
+        ...item,
+        ...food,
+      }
     }
 
     async deleteFreezerItem(freezer_item_uuid:string) {

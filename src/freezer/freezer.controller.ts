@@ -14,8 +14,8 @@ export class FreezerController {
 
   @Get()
   @UseGuards(AccessGuard)
-  async fetchAllFreezers(@Req() req): Promise<FreezerEntity[]> {
-    return await this.freezerService.fetchAllFreezers(
+  async fetchAllFreezers(@Req() req){
+    return await this.freezerService.fetchAllFreezersWithItemCount(
       this.freezerService.getUUIDFromReq(req),
     );
   }
@@ -49,8 +49,7 @@ export class FreezerController {
   @UseGuards(AccessGuard)
   async addFoodToFreezer(@Req() req, @Body() food:FreezerItem) {
     return await this.freezerService.addFoodToFreezer(
-      this.freezerService.getUUIDFromReq(req),
-      food,
+      food
     );
   };
 

@@ -23,8 +23,17 @@ export class BoardService {
     }).user_uuid;
   };
 
-  async fetchAllBoards() {
-    return await this.boardRepository.find();
+  async fetchAllBoardsWithProfile() {
+    const temp = await this.boardRepository.find();
+    const result = await Promise.all(temp.map(async (board) => {
+      const {user_uuid} = board;
+      const profile = await this.userService.getUserByUUID(user_uuid);
+      return {
+        ...board,
+        profile,
+      };
+    }));
+    return result;
   }
 
   async updateBoard(board: BoardEntity) {
@@ -44,12 +53,10 @@ export class BoardService {
       region,
       region_group,
     });
-
-  }
+  };
 
   async deleteBoard(board_uuid: string) {
     await this.boardRepository.delete({ board_uuid });
-
   }
 
 }

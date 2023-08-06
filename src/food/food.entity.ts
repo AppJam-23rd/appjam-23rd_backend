@@ -3,8 +3,8 @@ import { FreezerEntity } from "../freezer/freezer.entity";
 
 @Entity("foods")
 export class FoodEntity {
-  @PrimaryGeneratedColumn("increment")
-  id: number;
+  @PrimaryGeneratedColumn("uuid")
+  id: string;
 
   @Column({ length: 36, nullable: false })
   name: string;
@@ -15,7 +15,7 @@ export class FoodEntity {
   @Column("simple-array",{ nullable: false })
   raw_materials: string[];
 
-  @Column({ length: 36, nullable: false })
+  @Column({ type:'longtext', nullable: false })
   image: string;
 
   @Column({ length: 36, nullable: true })
